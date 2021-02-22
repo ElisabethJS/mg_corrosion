@@ -13,7 +13,7 @@ tf.keras.backend.set_floatx('float64')
 # Script parameters
 random_state = 42
 n_features_to_select = 5
-n_runs = 2
+n_runs = 100
 seeds = np.arange(n_runs)
 path = '..\\Data\\'
 csv_path = path + 'ze41_mol_desc_db_red.csv'
@@ -43,7 +43,7 @@ selected_cols = []
 
 for seed in seeds:
     rf = RandomForestRegressor(n_estimators=100, n_jobs=-1, oob_score=True, bootstrap=True, random_state=seed)
-    selector = RFE(rf, n_features_to_select=n_features_to_select, step=0.1).fit(X_train_sc, np.ravel(y_train))
+    selector = RFE(rf, n_features_to_select=n_features_to_select, step=0.1).fit(X_train_sc, np.ravel(y_train_sc))
     selected_cols.append([X.columns[i] for i in range(len(selector.support_)) if selector.support_[i]])
     if seed%10 == 9:
         print('RFE {:.2f}% done'.format((seed+1)*100/len(seeds)))

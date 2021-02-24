@@ -12,7 +12,7 @@ tf.keras.backend.set_floatx('float64')
 
 # Script parameters
 random_state = 42
-n_features_to_select = 5
+n_features_to_select = 6
 n_runs = 100
 seeds = np.arange(n_runs)
 path = '..\\Data\\'

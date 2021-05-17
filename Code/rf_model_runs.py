@@ -16,18 +16,19 @@ n_runs = 100
 seeds = np.arange(n_runs)
 path = '..\\Data\\'
 csv_path = path + 'ze41_mol_desc_db_red.csv'
-res_path = path + 'rf_results.pkl'
+res_path = path + 'rfe_results_recalc.pkl'
 
-rf_sel = ['VE2_G/D', 'Eig14_EA(dm)', 'Mor31m', 'TDB04u', 'HATS1e', 'HATS3p', 'RDF015p', 'Mor17s', 'N-072', 'O-057', 'MATS2m', 'E2m', 'RDF035v', 'Dp', 'CATS2D_00_AA', 'CATS3D_03_DL',
-          'SpPosA_D/Dt', 'CATS2D_02_AP', 'SpMaxA_EA(bo)', 'F03[C-N]', 'RDF080e', 'Chi_RG', 'HATS0e', 'CATS2D_06_PP', 'Eta_beta_A', 'SaaNH', 'MATS3v', 'SpMax6_Bh(s)', 'Mor09s',
-          'CATS2D_02_PL', 'HATS6p', 'Chi_Dz(e)', 'SsOH', 'Mor19p', 'H4i', 'Eta_FL_A', 'SAacc', 'R6m+', 'SpMAD_B(s)', 'SpMAD_G/D', 'R5m', 'TDB04i', 'nOHs', 'SM07_EA(bo)', 'GATS2m',
-          'SpMax2_Bh(e)', 'R4s', 'GATS6v', 'Ts', 'CATS2D_07_DD', 'CATS2D_04_AL', 'F06[C-C]', 'RDF045m', 'nRNR2', 'HATS2m', 'H5v', 'X3Av', 'SIC1', 'MATS6p', 'RDF055v', 'B03[O-O]',
-          'G2p', 'SpMAD_EA(bo)']
+univ_regr_sel = ['CATS2D_03_AP', 'CATS3D_03_AP', 'CATS3D_02_AP', 'LUMO / eV', 'P_VSA_MR_5', 'P_VSA_LogP_2', 'CATS2D_02_PN', 'CATS2D_03_DP', 'H3m',
+    'nRNH2', 'H%', 'Mor14u', 'CATS2D_03_AN', 'Eta_epsi_5', 'CATS3D_03_DP', 'P_VSA_e_3', 'Mor19m', 'Mv', 'Mor12e', 'B02[C-N]', 'Eta_F_A', 'R2e+',
+    'Mor14s', 'NssCH2', 'Mor32m', 'SHED_AP', 'P_VSA_ppp_con', 'Mor14v', 'Mor08s', 'E2m', 'SPH', 'MATS7m', 'F03[N-O]', 'SsNH2', 'CATS3D_04_NL',
+    'E3p', 'Hlgap / eV', 'CATS2D_04_AA', 'Mor08i', 'HOMO / eV', 'TDB03e', 'TDB02e', 'B03[N-O]', 'CATS3D_02_AN', 'Mi', 'Mor27m', 'TDB04v', 'ZM2V',
+    'Mor12p', 'Eta_FL_A', 'GATS1m', 'Ui', 'Mor12m', 'SHED_PN', 'SHED_DP', 'GATS1v', 'MLOGP', 'MPC07', 'nN', 'DLS_05', 'nArCOOH', 'Mor08p',
+    'SpPosA_B(e)']
 
-rfe_sel = ['P_VSA_MR_5', 'P_VSA_LogP_2', 'Mor22s', 'Mor04m', 'LUMO / eV', 'E1p', 'HOMO / eV', 'MATS5v', 'Mor14s', 'Mor29v', 'Mor14u', 'GATS5v', 'GATS2s', 'MATS5m', 'Mor32m',
-           'H3m', 'CATS3D_02_AP', 'TDB04s', 'R2e+', 'E2s', 'R5p+', 'ISH', 'DISPm', 'R5i+', 'Ds', 'Mor04i', 'E2m', 'Mor28s', 'TDB03m', 'Mor19m', 'Mor11u', 'VE2sign_G',
-           'Mor03s', 'SpMAD_RG', 'E2v', 'R3s+', 'R5e+', 'R2u+', 'Mor15i', 'H0v', 'T(N..O)', 'E1i', 'Eta_epsi_5', 'E3e', 'MATS4s', 'Mor13u', 'H1p', 'X4Av', 'Mor15s', 'Hy',
-           'HATS0p', 'Eig03_AEA(dm)', 'X3Av', 'VE1sign_G', 'GATS5m', 'E2e', 'Mor10e', 'MATS8p', 'TDB01m', 'GATS4s', 'TDB04m', 'PJI3', 'Mor16m']
+rfe_sel = ['P_VSA_MR_5', 'LUMO / eV', 'Mor04m', 'Mor22s', 'E1p', 'P_VSA_LogP_2', 'HOMO / eV', 'MATS5v', 'Mor14s', 'Mor29v', 'Mor14u', 'GATS5v', 'GATS2s', 'MATS5m', 'Mor32m',
+        'H3m', 'CATS3D_02_AP', 'TDB04s', 'R2e+', 'E2s', 'R5p+', 'ISH', 'DISPm', 'R5i+', 'Ds', 'Mor04i', 'E2m', 'Mor28s', 'TDB03m', 'Mor19m', 'Mor11u', 'VE2sign_G',
+        'Mor03s', 'SpMAD_RG', 'E2v', 'R3s+', 'R5e+', 'R2u+', 'Mor15i', 'H0v', 'T(N..O)', 'E1i', 'Eta_epsi_5', 'E3e', 'MATS4s', 'Mor13u', 'H1p', 'X4Av', 'Mor15s', 'Hy',
+        'HATS0p', 'Eig03_AEA(dm)', 'X3Av', 'VE1sign_G', 'GATS5m', 'E2e', 'Mor10e', 'MATS8p', 'TDB01m', 'GATS4s', 'TDB04m', 'PJI3', 'Mor16m']
 
 # Read in data, preprocessing
 data = pd.read_csv(csv_path, header=0, sep=';', decimal=',')
@@ -63,14 +64,14 @@ def get_model(n_input_features):
     return model
 
 def get_x_cols(n_features, col_source):
-    if col_source == 'rf':
-        return rf_sel[:n_features]
+    if col_source == 'urs':
+        return univ_regr_sel[:n_features]
     return rfe_sel[:n_features]
 
 results = {}
 
 for n_features in [3, 5, 63]:
-    for col_source in ['rf', 'rfe']:
+    for col_source in ['rfe']:
         losses = []
         predictions = pd.DataFrame(y_valid)
         for seed in seeds:

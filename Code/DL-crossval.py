@@ -88,12 +88,14 @@ for train_index, test_index in kf.split(X):
     y_train_sc, y_valid_sc, scaley = scale_y(y_train, y_valid)
 
     for n_features in [3, 5, 63, 1260]:
-        for type in ['a', 'b']:
+        print(n_features)
+        for ty in ['a', 'b']:
+            print(ty)
             if n_features == 1260:
                 cols = col_names[3:]
-                if type == 'b':
+                if ty == 'b':
                     continue
-            elif type == 'a':
+            elif ty == 'a':
                 cols = anova[:n_features]
             else:
                 cols = rfe[:n_features]
@@ -111,7 +113,7 @@ for train_index, test_index in kf.split(X):
                 predictions[seed] = scaley.inverse_transform(y_pred)
 
             evls = evaluate(predictions, y_valid)
-            stats_all_folds.append([i, n_features, type] + evls)
+            stats_all_folds.append([i, n_features, ty] + evls)
     i += 1
 
 stats_all_folds = pd.DataFrame(stats_all_folds, columns=['Index', 'Features', 'Type', 'R^2', 'RMSE', 'r', 'p'])

@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split, KFold
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.feature_selection import SelectKBest, f_regression
 from scipy.stats import linregress
 import tensorflow as tf
 from tensorflow import keras
@@ -15,7 +16,8 @@ seeds = np.arange(100)
 
 path = '..\\Data\\'
 csv_path = path + 'ze41_mol_desc_db_red.csv'
-stats_path = path + 'cv_all_stats.csv'
+stats_path = path + 'cv_cleaned.csv'
+#anova_path = path + 'anova_cv.pkl'
 
 # col names
 anova = ['CATS2D_03_AP', 'CATS3D_03_AP', 'CATS3D_02_AP', 'LUMO / eV',
@@ -79,29 +81,34 @@ def evaluate(predictions, y_valid):
 kf = KFold(n_splits=10, random_state=random_state, shuffle=True)
 
 stats_all_folds = []
+feat_anova = []
 i = 0
 
 for train_index, test_index in kf.split(X):
-    train_index = list(train_index)
-    test_index = list(test_index)
-    if 13 in train_index: train_index.remove(13)
-    if 13 in test_index: test_index.remove(13)
+    #if 13 in train_index: train_index.remove(13)
+    #if 13 in test_index: test_index.remove(13)
     X_train, X_valid = X.iloc[train_index, :], X.iloc[test_index, :]
     y_train, y_valid = pd.DataFrame(y.iloc[train_index]), pd.DataFrame(y.iloc[test_index])
     X_train_sc, X_valid_sc = scale_x(X_train, X_valid)
     y_train_sc, y_valid_sc, scaley = scale_y(y_train, y_valid)
-
-    for n_features in [3, 5, 63, 1260]:
-        for ty in ['a', 'b']:
+   
+    for n_features in [3, 5, 63]:#, 1260]:
+        skb = SelectKBest(f_regression, k=n_features)
+        _ = skb.fit_transform(X_train_sc, np.ravel(y_train_sc))
+        _, cls1 = zip(*sorted(zip(skb.scores_, X_train_sc.columns), reverse=True))
+        feat_anova.append(cls1[:n_features])
+        cols = list(cls1[:n_features])
+        
+        for ty in ['a']:#, 'b']:
             print(i, n_features, ty)
-            if n_features == 1260:
-                cols = col_names[3:]
-                if ty == 'b':
-                    continue
-            elif ty == 'a':
-                cols = anova[:n_features]
-            else:
-                cols = rfe[:n_features]
+            #if n_features == 1260:
+            #    cols = col_names[3:]
+            #    if ty == 'b':
+            #        continue
+            #elif ty == 'a'
+            #    cols = anova[:n_features]
+            #else:
+            #    cols = rfe[:n_features]
         
             predictions = pd.DataFrame(y_valid)
             
@@ -124,3 +131,5 @@ stats_all_folds = pd.DataFrame(stats_all_folds, columns=['Index', 'Features', 'T
 
 # save results
 stats_all_folds.to_csv(stats_path, header=True, sep=';', decimal=',')
+with open(anova_path, 'wb') as f:
+    pickle.dump(feat_anova, f, pickle.HIGHEST_PROTOCOL)

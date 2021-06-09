@@ -13,14 +13,19 @@ import os
 # Calling arguments
 args = sys.argv
 
-data_file = args[1]
-path_out = args[2]
+path_in = args[1]
+data_file = args[2]
+
+path = os.path.dirname(path_in)
+data_file = os.path.join(path, data_file)
+print(data_file)
 
 tf.keras.backend.set_floatx('float64')
 
 # Script parameters
 random_state = 3
 seeds = np.arange(100)
+#seeds = np.arange(1)
 
 # Read in data, preprocessing
 data = pd.read_csv(data_file, header=0, sep=';', decimal=',')
@@ -46,6 +51,8 @@ def get_model(n_input_features, learning_rate=0.01):
         optimizer=tf.optimizers.Adam(learning_rate=learning_rate),
         loss='mean_squared_error'
     )
+
+    return model
 
 kf = KFold(n_splits=6, random_state=random_state, shuffle=True)
 i = -1
@@ -93,9 +100,9 @@ for train_idx, test_idx in kf.split(X):
             'counts_rfe_fq': counts_fq,
             'anova_sorted': anova_sorted
         }
-        results_path = os.path.dirname(path_out) + '/feature_analysis_i{}_nfeatures{}.pkl'.format(i, n_features)
+        results_path = path + '/feature_analysis_i{}_nfeatures{}.pkl'.format(i, n_features)
         with open(results_path, 'wb+') as f:
-            pickle.dump(results_dict, f, pickle.pickle.HIGHEST_PROTOCOL)
+            pickle.dump(results_dict, f, pickle.HIGHEST_PROTOCOL)
 
         for model_type in ['anova', 'rfe', 'rfe_fq']:
             if model_type == 'anova':
@@ -104,14 +111,15 @@ for train_idx, test_idx in kf.split(X):
                 feature_list = cols_rfe
             else:
                 feature_list = cols_rfe_fq
+            feature_list = list(feature_list)
 
             for seed in seeds:
                 tf.keras.backend.clear_session()
                 tf.random.set_seed(seed)
                 model = get_model(n_features)
                 history = model.fit(X_train_sc[feature_list], y_train_sc, validation_data=(X_valid_sc[feature_list], y_valid_sc), epochs=25, verbose=0)
-                model_path = os.path.dirname(path_out) + '/model_i{}_nfeatures{}_type_{}_seed{}'.format(i, n_features, model_type, seed)
+                model_path = path + '/model_i{}_nfeatures{}_type_{}_seed{}'.format(i, n_features, model_type, seed)
                 model.save(model_path)
-                history_path = os.path.dirname(path_out) + '/history_i{}_nfeatures{}_type_{}_seed{}.pkl'.format(i, n_features, model_type, seed)
+                history_path = path + '/history_i{}_nfeatures{}_type_{}_seed{}.pkl'.format(i, n_features, model_type, seed)
                 with open(history_path, 'wb+') as f:
-                    pickle.dump(history, f, pickle.HIGHEST_PROTOCOL)
+                    pickle.dump(history.history, f, pickle.HIGHEST_PROTOCOL)
